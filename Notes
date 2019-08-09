@@ -1,0 +1,188 @@
+###Docker--9/4###
+
+	docker pull jenkins || Download the image from docker hub
+	
+	$docker run <image_name>  || will download if image not avilable locally from docker HUB
+
+	$docker image ls || To list of images
+	
+	REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+	hello-world         latest              fce289e99eb9        3 months ago        1.84kB
+	
+	$docker image inspect <image name /ID> || Shows the details of image
+--------------------------------------------------------------------------------------------------------------------------------------------------------		
+			$docker-machine ls || list the virtual machine on system
+			
+NAME      ACTIVE   DRIVER       STATE     URL                         SWARM   DOCKER     ERRORS
+default   *        virtualbox   Running   tcp://192.168.99.100:2376           v18.09.4
+			
+			$docker-machine ssh default || Connect virtual machine
+			                                                                                          --> Windows process to login vm
+			virtual machine -----
+								|
+								|--> User name :: docker
+								|--> Pwd :: tcuser
+			
+			Downloaded image will be stored here 
+			/var/lib/docker/image/overlay2/imagedb/content/sha256/fce289e99eb9bca977dae136fbe2a82b6b7d4c372474c9235adc1741675f587e  
+--------------------------------------------------------------------------------------------------------------------------------------------------------		
+====================================================================================================================================================================		
+	docker ps -a (all)|| shows the process of containers
+			  -f (filter)
+			  --format "table {{.ID}},/t{{.Image}}" <-- syntax
+			  --no-trunc || will not shortend the details
+			  -l || list only latest created process 
+====================================================================================================================================================================
+	docker history  &  docker image history  || both will give same output
+	
+
+#Docker container#
+
+docker create <container name> <image name>
+
+	docker top <container ID/name> || shows container process details 
+	
+		docker stop <container ID/name> || stops the container process & exit (check status using docker ps)
+		
+			docker start <<container ID/name>> || starts the container process
+			
+				docker stats <container ID/name> || shows CPU, MEM utilization
+				
+					docker pause <container ID/name> || Pause the container process
+						
+						docker unpause <container ID/name> || UNPause the container process
+						
+							docker attach <container ID/name> || Command will help to use the CLI of container = ctrl+c will kill container while detach = use ctrl+p+q NOT to exit on detach(run bg mode)
+							
+								docker kill <container ID/name> || will end container process abruptly
+								
+									docker rm <container ID/name> || Delete container || delete multiple container 
+										docker rm $(docker ps -a --format "table {{.ID}} \t {{Status}}" | grep "Exited")
+										docker rm $(docker ps -a --filter 'exited=0')
+										
+											docker exec <containerID/name> <commands> || execute commands in docker containerd
+								
+====================================================================================================================================================================
+***Docker file***
+
+create a docker file format <Dockerfile>
+----------------------------------------------------------------------------
+#sample Docker file
+
+	FROM ubuntu || in which base image product should get installed
+
+	MAINTAINER pperi0395@gmail.com || user mail
+
+	RUN apt-get update || updates the base image
+	RUN apt-get install nginx || Install nginx
+
+	CMD ["echo","image downloaded"]
+----------------------------------------------------------------------------
+
+#Build image#
+
+	docker build -t <imageName>:<tag> <Dockerfile_dir>
+
+New image installed
+
+	Push image to public repository
+	
+		create a repository in Docker HUB
+		
+			login your docker hub account in host
+			
+				docker login --|
+							   |-id docker id -- peri03
+							   |-pwd docker pwd -- Janee@123
+			Tag your image with repository
+			
+				docker tag <imageID> <public repository>
+				
+			Push to repository
+			
+				docker push <repository>
+				
+					image will get pushed to repository
+					
+			Pull image from repository
+			
+				docker pull <repository>:<tag name>
+
+====================================================================================================================================================================
+
+#Port management#
+
+Installed jenkins
+
+	docker inspect jenkins | grep "ExposedPorts"
+	
+		docker run -d -p 8080:8080 -p 50000:50000 jenkins
+				-d = Run in background mode/ detach mode
+				-p 8080:8080 = data port | port id of docker host
+				-p 50000:50000 = control port | port id of container
+		
+		#Get initial admin pwd to get started with jenkins#  91ab007763264c16846f8ae7cf229a50
+		
+		http://192.168.88.132:8080/ <-- Jenkins
+		
+		docker exec <containerID> cat /var/jenkins_home/secrets/initalAdminPassword
+	
+			
+====================================================================================================================================================================
+	
+ #Container Storage#
+ 
+ 2 types --
+			-- Volume <Data stored in part of host file system managed by docker {/var/lib/docker/volumes/<volname>/_data}>
+				- Volumes will not get removed even container gets removed
+			-- Bind mounts <Daata stored in user defined path>
+			
+ Docker Volume create <volume name> 
+	
+	Docker volume ls 
+		
+		Docker volume inspect <volume name> || Details of volume
+			
+			Docker Volume prune || removes the unused volumes
+			
+				docker volume rm <volume name>
+
+#Assign volume to container#				
+ 
+	docker run -dit -v <volume name>:<default storage location of container> -p <port> <image name>
+	
+	docker run -dit -v jenvol:/var/jenkins_home -p 8080:8080 -p 50000:50000 jenkins
+	
+#Bind mounts#
+
+	docker run -dit -v /home/peri/jenkins_storage:/var/jenkins_home -p 8080:8080 -p 50000:50000 jenkins
+
+====================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+									
+									
+									
+			
